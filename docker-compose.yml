@@ -1,0 +1,37 @@
+version: "3"
+services:
+    tensorflow_notebook:
+        image:  jupyter-pycharm
+        container_name: jupyter-pycharm
+#        build:
+#            image:
+#        runtime: nvidia
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=all
+        ports:
+            - 8887:8888
+        volumes:
+            - $PWD:/home/jovyan/work
+        restart: always
+    kubectl_work:
+        image: grothen-local
+        container_name: kubectl
+        volumes:
+          - $PWD:/kagglework
+        environment:
+            - PROJECT=${PROJECT}
+            - ZONE=${ZONE}
+            - CLIENT_ID=${CLIENT_ID}
+            - CLIENT_SECRET=${CLIENT_SECRET}
+            - KF_NAME=kf
+            - BASE_DIR=/kagglework
+            - KF_DIR=/kagglework/kubeflow
+            - PATH=$PATH:/kagglework/kfctl
+            - CONFIG_URI=https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_gcp_iap.v1.0.2.yaml
+            - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+        ports:
+          - 9999:8000
+        tty: true
+
+        command: /bin/bash /kagglework/set_init.sh
