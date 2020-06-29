@@ -43,17 +43,29 @@ def split_data(data: pd.DataFrame, example_test_data_ratio: float) -> Dict[str, 
     The data and the parameters will be loaded and provided to your function
     automatically when the pipeline is executed and it is time to run this node.
     """
-    data.columns = [
-        "sepal_length",
-        "sepal_width",
-        "petal_length",
-        "petal_width",
-        "target",
-    ]
+    # data.columns = [
+    #     "sepal_length",
+    #     "sepal_width",
+    #     "petal_length",
+    #     "petal_width",
+    #     "target",
+    # ]
+    #
+    unused_cols = ['diagnosis', 'benign_malignant',]
+    # if set(unused_cols) - set(data.columns) >0:
+    #     data=data.drop()
+
+    for unused_col in  unused_cols:
+        if unused_col in data.columns:
+            data =data.drop(unused_col, axis=1)
+
     classes = sorted(data["target"].unique())
     # One-hot encoding for the target variable
-    data = pd.get_dummies(data, columns=["target"], prefix="", prefix_sep="")
-
+    data = pd.get_dummies(data.drop(columns=["image_name","patient_id"],axis=1))
+    data["lower_age"] = data["age_approx"] <= 40
+    data["middle_age"] = (data["age_approx"] < 75) & (data["age_approx"] > 40)
+    data["upper_age"] = data["age_approx"] >= 75
+    data = data * 1
     # Shuffle all the data
     data = data.sample(frac=1).reset_index(drop=True)
 
